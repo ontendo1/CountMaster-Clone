@@ -9,7 +9,7 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] int count;
     [SerializeField] float soliderSpacingX, soliderSpacingZ, xGap, zGap;
     [SerializeField] float hSpeed, zSpeed, hBound;
-    List<GameObject> soliders = new List<GameObject>();
+    [HideInInspector] public List<GameObject> soliders = new List<GameObject>();
     List<Transform> startingSoliders = new List<Transform>();
     List<Transform> temporarySoliders = new List<Transform>();
     Rigidbody rb;
@@ -29,6 +29,13 @@ public class PlayerScript : MonoBehaviour
         SwipeDetection();
         transform.Translate(Vector3.forward * zSpeed * Time.deltaTime);
     }
+    private void FixedUpdate()
+    {
+        if (soliders.Count <= 0)
+        {
+            print("GAME OVER!!");
+        }
+    }
     void ChangeSoliderNumber()
     {
         temporarySoliders = GetComponentsInChildren<Transform>().ToList();
@@ -40,15 +47,14 @@ public class PlayerScript : MonoBehaviour
         }
         ReshapeSoliders();
     }
-    void ReshapeSoliders()
+    public void ReshapeSoliders()
     {
         int n = 0;
         int line = 0;
-        int lineSize = Mathf.CeilToInt(soliders.Count / 10);
-
+        int lineSize = Mathf.CeilToInt(soliders.Count / 5);
         foreach (GameObject solider in soliders)
         {
-            solider.transform.localPosition = new Vector3(line * soliderSpacingX - xGap * lineSize, defaultSoliderYValue, n * soliderSpacingZ - zGap);
+            solider.transform.localPosition = new Vector3(line * soliderSpacingX + xGap + lineSize, defaultSoliderYValue, n * soliderSpacingZ - zGap);
             if (n < lineSize)
             {
                 n++;
@@ -95,6 +101,9 @@ public class PlayerScript : MonoBehaviour
         if (other.CompareTag("Cross"))
         {
             CountValue countValue = other.GetComponent<CountValue>();
+            count = soliders.Count * countValue.value;
+            ChangeSoliderNumber();
+            other.transform.parent.gameObject.SetActive(false);
         }
     }
 }

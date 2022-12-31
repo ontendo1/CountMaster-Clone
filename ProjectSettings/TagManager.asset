@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Cross
   - Add
+  - Enemy
   layers:
   - Default
   - TransparentFX
