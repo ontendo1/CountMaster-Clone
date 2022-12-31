@@ -11,13 +11,10 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] float hSpeed, zSpeed, hBound;
     List<GameObject> soliders = new List<GameObject>();
     List<Transform> startingSoliders = new List<Transform>();
-    List<Transform> temporarySoliders = new List<Transform>();
     Rigidbody rb;
-    float defaultSoliderYValue;
     void Start()
     {
         startingSoliders = GetComponentsInChildren<Transform>().ToList();
-        defaultSoliderYValue = startingSoliders.ElementAt(1).transform.localPosition.y;
         foreach (Transform t in startingSoliders)
         {
             if (t.gameObject.transform.parent != null)
@@ -31,9 +28,7 @@ public class PlayerScript : MonoBehaviour
     }
     void ChangeSoliderNumber()
     {
-        temporarySoliders = GetComponentsInChildren<Transform>().ToList();
-
-        for (int i = 0; i < (count - temporarySoliders.Count + 1); i++)
+        for (int i = 0; i < count; i++)
         {
             GameObject solider = Instantiate(this.solider, transform, false);
             soliders.Add(solider);
@@ -48,7 +43,7 @@ public class PlayerScript : MonoBehaviour
 
         foreach (GameObject solider in soliders)
         {
-            solider.transform.localPosition = new Vector3(line * soliderSpacingX - xGap * lineSize, defaultSoliderYValue, n * soliderSpacingZ - zGap);
+            solider.transform.localPosition = new Vector3(line * soliderSpacingX - xGap * lineSize, transform.position.y, n * soliderSpacingZ - zGap);
             if (n < lineSize)
             {
                 n++;
@@ -88,9 +83,7 @@ public class PlayerScript : MonoBehaviour
         if (other.CompareTag("Add"))
         {
             CountValue countValue = other.GetComponent<CountValue>();
-            count = soliders.Count + countValue.value;
-            ChangeSoliderNumber();
-            other.transform.parent.gameObject.SetActive(false);
+            int newCount = soliders.Count + countValue.value;
         }
         if (other.CompareTag("Cross"))
         {
