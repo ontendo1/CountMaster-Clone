@@ -5,56 +5,76 @@ using UnityEngine;
 
 public class PlayerScript : MonoBehaviour
 {
-    [SerializeField] GameObject solider;
+    [SerializeField] GameObject solider; 
     [SerializeField] int count;
     [SerializeField] float soliderSpacingX, soliderSpacingZ, xGap, zGap;
-    [SerializeField] float hSpeed, zSpeed, hBound;
+    [SerializeField] float hSpeed, zSpeed, hBound; 
     [HideInInspector] public List<GameObject> soliders = new List<GameObject>();
     List<Transform> startingSoliders = new List<Transform>();
     List<Transform> temporarySoliders = new List<Transform>();
-    Rigidbody rb;
     float defaultSoliderYValue;
     void Start()
     {
-        startingSoliders = GetComponentsInChildren<Transform>().ToList();
+        //Oyunun başındaki oyuncu (asker) miktarını getirmek için.
+        startingSoliders = GetComponentsInChildren<Transform>().ToList(); 
+        
+        //Oyuncularımızın sahnede ayarlanmış y pozisyonunu alır
         defaultSoliderYValue = startingSoliders.ElementAt(1).transform.localPosition.y;
+
+        //Başlangıçtaki oyuncuları genel olarak kullanacağımız listeye atama:
         foreach (Transform t in startingSoliders)
         {
-            if (t.gameObject.transform.parent != null)
+            if (t.gameObject.transform.parent != null) //Parent object'i de listeye eklenmesin diye.
                 soliders.Add(t.gameObject);
         }
     }
     void Update()
     {
-        SwipeDetection();
+        //Ekran kaydırma kontrolleri
+        SwipeDetection(); 
+
+        //Sürekli olarak ileri gitmek için
         transform.Translate(Vector3.forward * zSpeed * Time.deltaTime);
     }
     private void FixedUpdate()
     {
-        if (soliders.Count <= 0)
+        //Eğer listemizdeki elemanlar sıfır veya sıfırdan küçükse oyun oyun bitsin.
+        if (soliders.Count <= 0) 
         {
-            print("GAME OVER!!");
+            print("GAME OVER!!");   //Oyun bitince olacak olaylar buraya yazılacak.
         }
     }
+
     void ChangeSoliderNumber()
     {
+        //İşlem yapılması kolaylaşsın diye şu anki askerlerimizi geçici bir listede tutuyorum.
         temporarySoliders = GetComponentsInChildren<Transform>().ToList();
 
+        //Yeni asker sayısına eşitlemek için farkı kadar asker ekliyoruz veya çıkarıyoruz.
         for (int i = 0; i < (count - temporarySoliders.Count + 1); i++)
         {
             GameObject solider = Instantiate(this.solider, transform, false);
             soliders.Add(solider);
         }
+
+        //Askerlerin şeklini tekrar ayarlıyoruz.
         ReshapeSoliders();
     }
+
     public void ReshapeSoliders()
     {
         int n = 0;
         int line = 0;
-        int lineSize = Mathf.CeilToInt(soliders.Count / 5);
+        int lineSize = Mathf.CeilToInt(soliders.Count / 9);
+
+        //Askerleri ana oyuncu üzerinde ortalamak için.
+        xGap = lineSize * 1.15f / 2;
+
+        //Askerlerin bir şekil halinde dizilmesi için döngü kullanıyoruz.
+        //Kare şeklinde dizmeyi tercih ettim.
         foreach (GameObject solider in soliders)
         {
-            solider.transform.localPosition = new Vector3(line * soliderSpacingX + xGap + lineSize, defaultSoliderYValue, n * soliderSpacingZ - zGap);
+            solider.transform.localPosition = new Vector3(line * soliderSpacingX - xGap, defaultSoliderYValue, n * soliderSpacingZ - zGap);
             if (n < lineSize)
             {
                 n++;
@@ -66,6 +86,8 @@ public class PlayerScript : MonoBehaviour
             }
         }
     }
+
+    //Kontrol kodları.
     Vector2 firstTouchPosition;
     float swipeDir;
     Vector3 moveSpeed;
@@ -94,10 +116,14 @@ public class PlayerScript : MonoBehaviour
         if (other.CompareTag("Add"))
         {
             CountValue countValue = other.GetComponent<CountValue>();
+
+            //Asker sayısını tutan değişkene; listedeki asker sayısına kazandığımız değeri ekliyoruz.
             count = soliders.Count + countValue.value;
+
             ChangeSoliderNumber();
             other.transform.parent.gameObject.SetActive(false);
         }
+        
         if (other.CompareTag("Cross"))
         {
             CountValue countValue = other.GetComponent<CountValue>();
